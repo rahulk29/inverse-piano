@@ -18,7 +18,7 @@ file_path = "twinkle_twinkle_as.wav"
 
 
 def window_size(sample_rate, tempo):
-    return int(round(60 / tempo * sample_rate))
+    return int(round(60 / tempo / 2 * sample_rate))
 
 
 def aud_open(path):
@@ -51,8 +51,6 @@ def fft_plot(xf, yf):
 samples, sampling_rate = aud_open(file_path)
 duration = len(samples) / sampling_rate
 print("Performing sophisticated analysis of input audio...")
-print("Duration of Audio: ", duration, " seconds")
-print(f'Sampling rate: {sampling_rate}')
 
 window_size = window_size(sampling_rate, TEMPO)
 n_windows = len(samples) // window_size
@@ -60,7 +58,6 @@ n_windows = len(samples) // window_size
 quarter_notes = []
 
 for i in range(n_windows):
-    print(f"window {i}")
     window = samples[i * window_size : (i + 1) * window_size]
     xf, yf = aud_fft(window, sampling_rate)
 
@@ -71,18 +68,15 @@ for i in range(n_windows):
             note_sr == sampling_rate
         ), "note clips must have the same sampling rate as input audio"
         _, note_fft = aud_fft(note_samples[:window_size], note_sr)
-        corr = np.correlate(yf, note_fft, mode="full")/np.sum(np.abs(note_fft))
-        max_corr=np.max(np.abs(corr))
+        corr = np.correlate(yf, note_fft, mode="full") / np.sum(np.abs(note_fft))
+        max_corr = np.max(np.abs(corr))
         # print(f'{note["name"]}: {max_corr}')
         if max_corr > NOTE_THRESH and max_corr > best_val:
             best_note = note["name"]
             best_val = max_corr
     if best_note is None:
-        print('no note detected')
-        quarter_notes.append('X')
+        quarter_notes.append("X")
     else:
-        print(f'found {best_note}')
         quarter_notes.append(best_note)
 
-print(f'NOTES: {quarter_notes}')
-
+print(f"NOTES: {quarter_notes}")
